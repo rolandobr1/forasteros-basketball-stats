@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" /> <!-- O tu favicon -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tu App con Vite</title>
+    <!-- Tailwind CDN o configuración de Tailwind con PostCSS (recomendado para producción con Vite) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'brand-dark': '#1a202c', 
+              'brand-surface': '#2d3748', 
+              'brand-accent': '#a50515', // Main accent color (red)
+              'brand-button': '#6B7280', // Updated to Tailwind gray-500
+              'brand-button-hover': '#4B5563', // Updated to Tailwind gray-600
+              'brand-text-primary': '#e2e8f0', 
+              'brand-text-secondary': '#a0aec0', 
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react-icons/": "https://esm.sh/react-icons@^5.5.0/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.4.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.6.2"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script> 
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
