@@ -77,7 +77,7 @@ const HelpPage: React.FC = () => {
       <h1 className="text-4xl font-bold text-center text-white mb-10">Página de Ayuda</h1>
 
       <section className="bg-brand-surface p-6 rounded-lg shadow-xl">
-        <h2 className="text-2xl font-semibold text-brand-accent mb-6 flex items-center">
+        <h2 className="text-2xl font-semibold text-white mb-6 flex items-center">
           <QuestionIcon className="w-7 h-7 mr-3" />
           Preguntas Frecuentes (FAQ)
         </h2>
@@ -106,7 +106,7 @@ const HelpPage: React.FC = () => {
       </section>
 
       <section className="bg-brand-surface p-6 rounded-lg shadow-xl">
-        <h2 className="text-2xl font-semibold text-brand-accent mb-6">Contactar Soporte</h2>
+        <h2 className="text-2xl font-semibold text-white mb-6">Contactar Soporte</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-1">Nombre</label>

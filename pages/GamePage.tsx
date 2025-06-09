@@ -8,7 +8,7 @@ import SubstitutionModal from '../components/SubstitutionModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import AlertDialog from '../components/AlertDialog';
 import AddPlayerToGameTeamModal from '../components/AddPlayerToGameTeamModal'; // Import new modal
-import { UndoIcon, PlusIcon, SparklesIcon, StarIcon } from '../utils';
+import { UndoIcon, PlusIcon, SparklesIcon, GoStarFillIcon, StatsChartIcon, SwapIcon } from '../utils'; // Added GoStarFillIcon, SwapIcon
 
 interface GamePageProps {
   gameData: Game | null;
@@ -40,17 +40,19 @@ const GamePage: React.FC<GamePageProps> = ({ gameData, setGameData, onGameEnd, r
   const [isAddPlayerModalOpen, setIsAddPlayerModalOpen] = useState(false);
   const [teamToAddTo, setTeamToAddTo] = useState<TeamType | null>(null);
 
-  const longPressTimerRef = useRef<number | null>(null);
+  const [isTeamOrderSwapped, setIsTeamOrderSwapped] = useState(false); // State for team display order
+
+  const longPressTimeoutIdRef = useRef<number | null>(null);
+  const isLongPressActiveRef = useRef<boolean>(false);
   const LONG_PRESS_DURATION = 1000; // 1 second
 
   useEffect(() => {
     if (!gameData) {
       navigate('/setup');
     }
-    // Clear any active long press timer on component unmount
-    return () => {
-      if (longPressTimerRef.current) {
-        clearTimeout(longPressTimerRef.current);
+    return () => { // Cleanup any running timer on component unmount
+      if (longPressTimeoutIdRef.current) {
+        clearTimeout(longPressTimeoutIdRef.current);
       }
     };
   }, [gameData, navigate]);
@@ -152,23 +154,48 @@ const GamePage: React.FC<GamePageProps> = ({ gameData, setGameData, onGameEnd, r
     setIsStatsModalOpen(true);
   };
 
-  const handleStatsButtonPressStart = (player: Player, teamType: TeamType) => {
-    if (longPressTimerRef.current) {
-        clearTimeout(longPressTimerRef.current);
+  const handleStatsButtonPressStart = (e: React.MouseEvent | React.TouchEvent, player: Player, teamType: TeamType) => {
+    e.preventDefault();
+    if (longPressTimeoutIdRef.current) {
+        clearTimeout(longPressTimeoutIdRef.current);
     }
-    longPressTimerRef.current = window.setTimeout(() => {
-        openStatsModalWithMode(player, teamType, 'persistent');
-        longPressTimerRef.current = null; // Mark as handled
+    isLongPressActiveRef.current = false; // Reset flag at the start of a new press
+
+    longPressTimeoutIdRef.current = window.setTimeout(() => {
+        isLongPressActiveRef.current = true; // Mark long press as active
+        longPressTimeoutIdRef.current = null; // Indicate timer has fired
     }, LONG_PRESS_DURATION);
   };
 
-  const handleStatsButtonPressEnd = (player: Player, teamType: TeamType) => {
-    if (longPressTimerRef.current) { // If timer is still active, it means it wasn't a long press
-        clearTimeout(longPressTimerRef.current);
-        longPressTimerRef.current = null;
-        openStatsModalWithMode(player, teamType, 'auto'); // Open in normal (auto) mode
+  const handleStatsButtonPressEnd = (e: React.MouseEvent | React.TouchEvent, player: Player, teamType: TeamType) => {
+    e.preventDefault();
+    if (longPressTimeoutIdRef.current) { // Timer was still running (short press)
+        clearTimeout(longPressTimeoutIdRef.current);
+        longPressTimeoutIdRef.current = null;
+        // isLongPressActiveRef.current is still false from handleStatsButtonPressStart
     }
-    // If longPressTimerRef.current is null, it means long press already fired and opened the modal.
+
+    // If longPressTimeoutIdRef.current is null here, it means either:
+    // 1. The timeout fired (long press, isLongPressActiveRef.current should be true)
+    // 2. It was a short press and we just cleared it above (isLongPressActiveRef.current is false)
+    // 3. It was cancelled by cancelLongPress (which also sets longPressTimeoutIdRef.current to null)
+
+    const mode = isLongPressActiveRef.current ? 'persistent' : 'auto';
+    openStatsModalWithMode(player, teamType, mode);
+    
+    isLongPressActiveRef.current = false; // Reset for next interaction cycle
+  };
+  
+  const cancelLongPress = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    // Only clear the pending timeout. Do not change isLongPressActiveRef.
+    // If the long press timeout has already fired and set isLongPressActiveRef to true,
+    // that "long press activation" should persist until the press sequence fully ends (onMouseUp/onTouchEnd)
+    // or a new press starts.
+    if (longPressTimeoutIdRef.current) {
+        clearTimeout(longPressTimeoutIdRef.current);
+        longPressTimeoutIdRef.current = null;
+    }
   };
 
 
@@ -194,7 +221,6 @@ const GamePage: React.FC<GamePageProps> = ({ gameData, setGameData, onGameEnd, r
     setIsAddPlayerModalOpen(true);
   };
 
-  // Timer Control Handlers (unchanged from previous state, ensure they are correct)
   const handleStartTimer = useCallback(() => {
     setGameData(prev => {
       if (!prev || prev.gamePhase === GamePhase.FINISHED) return prev;
@@ -369,6 +395,10 @@ const GamePage: React.FC<GamePageProps> = ({ gameData, setGameData, onGameEnd, r
     return Object.keys(team.stats).filter(playerId => calculatePlayerPoints(team.stats[playerId]) === maxPoints);
   };
 
+  const toggleTeamOrder = () => {
+    setIsTeamOrderSwapped(prev => !prev);
+  };
+
   if (!gameData) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
@@ -383,6 +413,10 @@ const GamePage: React.FC<GamePageProps> = ({ gameData, setGameData, onGameEnd, r
   const currentTeamDisplay = activeTab === 'home' ? gameData.homeTeam : gameData.awayTeam;
   const leadingScorersForCurrentTeam = getLeadingScorers(currentTeamDisplay);
 
+  const teamLeft = isTeamOrderSwapped ? gameData.awayTeam : gameData.homeTeam;
+  const teamRight = isTeamOrderSwapped ? gameData.homeTeam : gameData.awayTeam;
+
+
   return (
     <div className="space-y-4 md:space-y-6">
       <TimerDisplay
@@ -393,23 +427,33 @@ const GamePage: React.FC<GamePageProps> = ({ gameData, setGameData, onGameEnd, r
         onGoToNextPeriod={handleGoToNextPeriod}
         onGoToPrevPeriod={handleGoToPrevPeriod}
       />
-
-      <div className="grid grid-cols-2 gap-4">
-        <TeamDisplay team={gameData.homeTeam} gameSettings={gameData.settings} />
-        <TeamDisplay team={gameData.awayTeam} gameSettings={gameData.settings} />
+      
+      <div className="relative">
+         <div className="grid grid-cols-2 gap-4">
+            <TeamDisplay team={teamLeft} gameSettings={gameData.settings} />
+            <TeamDisplay team={teamRight} gameSettings={gameData.settings} />
+        </div>
+        <button
+            onClick={toggleTeamOrder}
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-brand-accent"
+            aria-label="Intercambiar posición de equipos"
+        >
+            <SwapIcon className="w-5 h-5" />
+        </button>
       </div>
+
 
       <div className="bg-brand-surface rounded-lg shadow-md">
         <div className="flex border-b border-slate-700">
           <button
             onClick={() => setActiveTab('home')}
-            className={`flex-1 py-3 px-2 text-center font-medium ${activeTab === 'home' ? 'text-brand-accent border-b-2 border-brand-accent' : 'text-slate-400 hover:text-white'}`}
+            className={`flex-1 py-3 px-2 text-center transition-colors duration-150 ${activeTab === 'home' ? 'bg-brand-accent text-white font-semibold' : 'text-slate-400 hover:text-white hover:bg-slate-700/50'}`}
           >
             {gameData.homeTeam.name}
           </button>
           <button
             onClick={() => setActiveTab('away')}
-            className={`flex-1 py-3 px-2 text-center font-medium ${activeTab === 'away' ? 'text-brand-accent border-b-2 border-brand-accent' : 'text-slate-400 hover:text-white'}`}
+            className={`flex-1 py-3 px-2 text-center transition-colors duration-150 ${activeTab === 'away' ? 'bg-brand-accent text-white font-semibold' : 'text-slate-400 hover:text-white hover:bg-slate-700/50'}`}
           >
             {gameData.awayTeam.name}
           </button>
@@ -427,27 +471,26 @@ const GamePage: React.FC<GamePageProps> = ({ gameData, setGameData, onGameEnd, r
                  const isLeadingScorer = leadingScorersForCurrentTeam.includes(player.id);
 
                  return (
-                    <li key={player.id} className={`flex items-center justify-between p-2 rounded-md ${isLeadingScorer ? 'bg-amber-900/30 border-l-4 border-brand-accent' : 'bg-slate-700'} hover:bg-slate-600`}>
+                    <li key={player.id} className={`flex items-center justify-between p-2 rounded-md ${isLeadingScorer ? 'bg-yellow-700/40 border-l-4 border-yellow-500' : 'bg-slate-700'} hover:bg-slate-600`}>
                       <div className={`flex-grow truncate ${isEffectivelyFouledOut ? 'text-red-500 line-through' : 'text-white'}`}>
-                        {isLeadingScorer && <StarIcon className="w-4 h-4 inline mr-1 text-yellow-400" />}
+                        {isLeadingScorer && <GoStarFillIcon className="w-4 h-4 inline mr-1 text-yellow-400" />}
                         #{player.number} {player.name} 
                         <span className="text-xs text-slate-400 ml-2">
                           {points} pts, {stats[StatType.FOULS_PERSONAL] || 0} PF
                         </span>
                       </div>
                       <button
-                        onMouseDown={() => handleStatsButtonPressStart(player, activeTab)}
-                        onMouseUp={() => handleStatsButtonPressEnd(player, activeTab)}
-                        onTouchStart={() => handleStatsButtonPressStart(player, activeTab)}
-                        onTouchEnd={() => handleStatsButtonPressEnd(player, activeTab)}
-                        onMouseLeave={() => { // Clear timer if mouse leaves button during press
-                            if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
-                        }}
+                        onMouseDown={(e) => handleStatsButtonPressStart(e, player, activeTab)}
+                        onMouseUp={(e) => handleStatsButtonPressEnd(e, player, activeTab)}
+                        onTouchStart={(e) => handleStatsButtonPressStart(e, player, activeTab)}
+                        onTouchEnd={(e) => handleStatsButtonPressEnd(e, player, activeTab)}
+                        onMouseLeave={(e) => cancelLongPress(e)}
+                        onTouchCancel={(e) => cancelLongPress(e)}
                         disabled={gameData.gamePhase === GamePhase.FINISHED || isEffectivelyFouledOut}
-                        className="ml-2 px-3 py-1 text-xs bg-brand-button hover:bg-brand-button-hover text-white rounded disabled:opacity-50"
+                        className="ml-2 p-2 bg-brand-button hover:bg-brand-button-hover text-white rounded disabled:opacity-50 flex items-center justify-center"
                         aria-label={`Estadísticas para ${player.name}`}
                       >
-                        Stats
+                        <StatsChartIcon className="w-5 h-5" />
                       </button>
                     </li>
                  );

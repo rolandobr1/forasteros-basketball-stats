@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Player, TeamGameInfo, TeamType, DialogProps } from '../types';
 import { XMarkIcon, ArrowPathIcon } from '../utils';
@@ -45,7 +44,7 @@ const SubstitutionModal: React.FC<SubstitutionModalProps> = ({
         <div className="flex-grow overflow-y-auto mb-4 pr-2 grid md:grid-cols-2 gap-4">
           {/* Players on Court (to select player OUT) */}
           <div>
-            <h3 className="text-md font-medium text-brand-accent mb-2">Sale de Cancha:</h3>
+            <h3 className="text-md font-medium text-white mb-2">Sale de Cancha:</h3>
             {team.onCourt.length === 0 ? <p className="text-slate-400 text-sm">Nadie en cancha.</p> : (
               <ul className="space-y-2">
                 {team.onCourt.map(p => (
@@ -64,7 +63,7 @@ const SubstitutionModal: React.FC<SubstitutionModalProps> = ({
 
           {/* Players on Bench (to select player IN) */}
           <div>
-            <h3 className="text-md font-medium text-brand-accent mb-2">Entra a Cancha:</h3>
+            <h3 className="text-md font-medium text-white mb-2">Entra a Cancha:</h3>
              {team.bench.length === 0 ? <p className="text-slate-400 text-sm">Banca vacía.</p> : (
                 <ul className="space-y-2">
                 {team.bench.map(p => (

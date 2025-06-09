@@ -127,7 +127,7 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({
 
         <div className="overflow-y-auto mb-4 flex-grow pr-2 space-y-3">
           <div>
-            <h3 className="text-md font-medium text-brand-accent mb-1">Puntos:</h3>
+            <h3 className="text-md font-medium text-white mb-1">Puntos:</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {POINTS_STATS.map(statKey => (
                 <StatButton
@@ -143,7 +143,7 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({
             </div>
           </div>
           <div>
-            <h3 className="text-md font-medium text-brand-accent mb-1">Otras Estadísticas:</h3>
+            <h3 className="text-md font-medium text-white mb-1">Otras Estadísticas:</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {OTHER_STATS.map(statKey => (
                 <StatButton

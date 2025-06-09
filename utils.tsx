@@ -1,8 +1,10 @@
-
 import React from 'react';
 import { PiBasketball, PiSignOutBold, PiQuestion } from 'react-icons/pi'; // Import the new icon
-import { FaRegTrashAlt } from 'react-icons/fa'; // Import FaRegTrashAlt
+import { FaRegTrashAlt, FaExchangeAlt } from 'react-icons/fa'; // Import FaRegTrashAlt and FaExchangeAlt
 import { GiBasketballBasket } from 'react-icons/gi'; // Added for LiveGameIcon
+import { IoStatsChart } from "react-icons/io5"; // Added for StatsChartIcon
+import { GoStarFill } from "react-icons/go"; // Added for GoStarFillIcon
+import { VscDebugRestart } from "react-icons/vsc"; // Added for RestartIcon
 import { Game, GamePhase, GameSettings, TeamGameInfo } from './types'; // Added Game, GamePhase, GameSettings for gameLogic
 
 // Formats time in seconds to MM:SS
@@ -261,9 +263,14 @@ export const PauseIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 export const StarIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6" {...props}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.479.038.673.724.317 1.02l-4.218 3.873a.563.563 0 0 0-.182.623l1.342 5.424c.072.292-.376.534-.638.372l-4.882-3.177a.563.563 0 0 0-.682 0l-4.882 3.177c-.261.162-.71.08-.638-.372l1.342-5.424a.563.563 0 0 0-.182-.623L.494 10.017c-.356-.296-.162-.982.317-1.02l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518 .442c.479.038.673.724.317 1.02l-4.218 3.873a.563.563 0 0 0-.182.623l1.342 5.424c.072.292-.376.534-.638.372l-4.882-3.177a.563.563 0 0 0-.682 0l-4.882 3.177c-.261.162-.71.08-.638-.372l1.342-5.424a.563.563 0 0 0-.182-.623L.494 10.017c-.356-.296-.162-.982.317-1.02l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
   </svg>
 );
+
+export const GoStarFillIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <GoStarFill {...props} />
+);
+
 export const ChevronLeftIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5" {...props}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -292,4 +299,16 @@ export const QuestionIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => 
 
 export const LiveGameIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <GiBasketballBasket {...props} />
+);
+
+export const StatsChartIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <IoStatsChart {...props} />
+);
+
+export const SwapIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <FaExchangeAlt {...props} />
+);
+
+export const RestartIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <VscDebugRestart {...props} />
 );

@@ -413,7 +413,7 @@ const App: React.FC = () => {
     <HashRouter>
       <ScrollToTop />
       <EnsureInitialRoute />
-      <div className="bg-gradient-to-br from-gray-900 via-black to-red-900 min-h-screen flex flex-col overflow-x-hidden">
+      <div className="bg-gradient-to-br from-gray-900 via-black to-red-900 min-h-screen flex flex-col overflow-x-hidden select-none">
         <AppLayout
           menuItems={menuItems}
           playersRoster={playersRoster}

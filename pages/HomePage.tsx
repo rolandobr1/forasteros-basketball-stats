@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BasketballIcon, ClockIcon, UsersIcon } from '../utils';
+import { BasketballIcon, ClockIcon, UsersIcon, RestartIcon } from '../utils'; // Added RestartIcon
 import { Game, GamePhase } from '../types';
 import { TEAM_PLACEHOLDER_LOGO } from '../constants';
 
@@ -37,7 +36,7 @@ const HomePage: React.FC<HomePageProps> = ({ currentGame }) => {
             <h2 className="text-xl">Reanudar Partido</h2>
             <p className="text-sm text-green-100">Continuar con el partido en curso.</p>
           </div>
-          <ClockIcon className="w-8 h-8" />
+          <RestartIcon className="w-8 h-8" /> {/* Changed from ClockIcon to RestartIcon */}
         </button>
       )}
 

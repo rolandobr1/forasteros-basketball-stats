@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Game, PlayerStats, StatType, Player, GameSettings, initialPlayerStats, GamePhase } from '../types'; // Added GamePhase
 import { formatTime, DocumentTextIcon, ChevronDownIcon, ChevronUpIcon, DeleteIcon } from '../utils';
@@ -19,9 +18,10 @@ const generateCSV = (game: Game): string => {
 
   const customHeaders = [
     "Jugador", "Equipo", "Número",
-    STAT_TYPE_LABELS[StatType.POINTS_1_MADE], STAT_TYPE_LABELS[StatType.POINTS_1_ATTEMPTED],
+    STAT_TYPE_LABELS[StatType.POINTS_1_MADE], STAT_TYPE_LABELS[StatType.POINTS_1_ATTEMPTED], "TL%",
     STAT_TYPE_LABELS[StatType.POINTS_2_MADE], STAT_TYPE_LABELS[StatType.POINTS_2_ATTEMPTED],
-    STAT_TYPE_LABELS[StatType.POINTS_3_MADE], STAT_TYPE_LABELS[StatType.POINTS_3_ATTEMPTED],
+    STAT_TYPE_LABELS[StatType.POINTS_3_MADE], STAT_TYPE_LABELS[StatType.POINTS_3_ATTEMPTED], "3P%",
+    "TC Anotados", "TC Intentados", "FG%", // TC (Tiros de Campo)
     "Rebotes Totales",
     STAT_TYPE_LABELS[StatType.ASSISTS], STAT_TYPE_LABELS[StatType.STEALS],
     STAT_TYPE_LABELS[StatType.BLOCKS], STAT_TYPE_LABELS[StatType.TURNOVERS],
@@ -33,6 +33,12 @@ const generateCSV = (game: Game): string => {
     const n = Number(val);
     return isNaN(n) ? 0 : n;
   };
+  
+  const formatPercentageForCSV = (made: number, attempted: number): string => {
+    if (attempted === 0) return "0.0%"; // Or "N/A" as preferred for CSV
+    return ((made / attempted) * 100).toFixed(1) + "%";
+  };
+
 
   const playerToRow = (player: Player, teamName: string, playerStatsData: PlayerStats | undefined): string => {
     const statsSource = playerStatsData || initialPlayerStats;
@@ -50,13 +56,22 @@ const generateCSV = (game: Game): string => {
                    safeNum(pStats[StatType.POINTS_2_MADE]) * 2 +
                    safeNum(pStats[StatType.POINTS_3_MADE]) * 3;
     const totalRebounds = safeNum(pStats[StatType.REBOUNDS_OFFENSIVE]) + safeNum(pStats[StatType.REBOUNDS_DEFENSIVE]);
+    
+    const fgm = safeNum(pStats[StatType.POINTS_2_MADE]) + safeNum(pStats[StatType.POINTS_3_MADE]);
+    const fga = safeNum(pStats[StatType.POINTS_2_ATTEMPTED]) + safeNum(pStats[StatType.POINTS_3_ATTEMPTED]);
+    const fgPercent = formatPercentageForCSV(fgm, fga);
+    const ftPercent = formatPercentageForCSV(safeNum(pStats[StatType.POINTS_1_MADE]), safeNum(pStats[StatType.POINTS_1_ATTEMPTED]));
+    const threePPercent = formatPercentageForCSV(safeNum(pStats[StatType.POINTS_3_MADE]), safeNum(pStats[StatType.POINTS_3_ATTEMPTED]));
+
+
     const row = [
       player.name,
       teamName,
       player.number,
-      pStats[StatType.POINTS_1_MADE], pStats[StatType.POINTS_1_ATTEMPTED],
+      pStats[StatType.POINTS_1_MADE], pStats[StatType.POINTS_1_ATTEMPTED], ftPercent,
       pStats[StatType.POINTS_2_MADE], pStats[StatType.POINTS_2_ATTEMPTED],
-      pStats[StatType.POINTS_3_MADE], pStats[StatType.POINTS_3_ATTEMPTED],
+      pStats[StatType.POINTS_3_MADE], pStats[StatType.POINTS_3_ATTEMPTED], threePPercent,
+      fgm, fga, fgPercent,
       totalRebounds,
       pStats[StatType.ASSISTS],
       pStats[StatType.STEALS],
@@ -65,7 +80,7 @@ const generateCSV = (game: Game): string => {
       pStats[StatType.FOULS_PERSONAL],
       points
     ];
-    return row.join(',') + "\n";
+    return row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(',') + "\n"; // Ensure CSV formatting for values with commas
   };
 
   csvContent += `Estadísticas de ${game.homeTeam.name}\n`;
@@ -333,6 +348,11 @@ const GameCard: React.FC<{ game: Game, onDeleteGame: (gameId: string) => void }>
     const n = Number(val);
     return isNaN(n) ? 0 : n;
   };
+  
+  const formatPercentage = (made: number, attempted: number): string => {
+    if (attempted === 0) return "-";
+    return ((made / attempted) * 100).toFixed(1) + '%';
+  };
 
   const renderPlayerStatsTable = (teamName: string, players: Player[], teamStats: Record<string, PlayerStats>) => (
     <div className="mt-2">
@@ -344,6 +364,9 @@ const GameCard: React.FC<{ game: Game, onDeleteGame: (gameId: string) => void }>
               <th className="p-1 text-left">Jugador (#)</th>
               <th className="p-1 text-center">Pts</th><th className="p-1 text-center">Reb</th><th className="p-1 text-center">Ast</th>
               <th className="p-1 text-center">Stl</th><th className="p-1 text-center">Blk</th><th className="p-1 text-center">PF</th>
+              <th className="p-1 text-center" title="Porcentaje Tiros de Campo">FG%</th>
+              <th className="p-1 text-center" title="Porcentaje Tiros Libres">TL%</th>
+              <th className="p-1 text-center" title="Porcentaje Triples">3P%</th>
             </tr>
           </thead>
           <tbody>
@@ -365,6 +388,19 @@ const GameCard: React.FC<{ game: Game, onDeleteGame: (gameId: string) => void }>
                 safeNum(playerStats[StatType.POINTS_3_MADE]) * 3;
               const rebounds = safeNum(playerStats[StatType.REBOUNDS_OFFENSIVE]) +
                                safeNum(playerStats[StatType.REBOUNDS_DEFENSIVE]);
+              
+              const fgMade = safeNum(playerStats[StatType.POINTS_2_MADE]) + safeNum(playerStats[StatType.POINTS_3_MADE]);
+              const fgAttempted = safeNum(playerStats[StatType.POINTS_2_ATTEMPTED]) + safeNum(playerStats[StatType.POINTS_3_ATTEMPTED]);
+              const fgPercent = formatPercentage(fgMade, fgAttempted);
+
+              const ftMade = safeNum(playerStats[StatType.POINTS_1_MADE]);
+              const ftAttempted = safeNum(playerStats[StatType.POINTS_1_ATTEMPTED]);
+              const ftPercent = formatPercentage(ftMade, ftAttempted);
+              
+              const threeMade = safeNum(playerStats[StatType.POINTS_3_MADE]);
+              const threeAttempted = safeNum(playerStats[StatType.POINTS_3_ATTEMPTED]);
+              const threePercent = formatPercentage(threeMade, threeAttempted);
+
               return (
                 <tr key={p.id} className="border-b border-slate-600 last:border-b-0">
                   <td className="p-1">{p.name} ({p.number})</td>
@@ -374,9 +410,12 @@ const GameCard: React.FC<{ game: Game, onDeleteGame: (gameId: string) => void }>
                   <td className="p-1 text-center">{safeNum(playerStats[StatType.STEALS])}</td>
                   <td className="p-1 text-center">{safeNum(playerStats[StatType.BLOCKS])}</td>
                   <td className="p-1 text-center">{safeNum(Number(playerStats[StatType.FOULS_PERSONAL]))}</td>
+                  <td className="p-1 text-center">{fgPercent}</td>
+                  <td className="p-1 text-center">{ftPercent}</td>
+                  <td className="p-1 text-center">{threePercent}</td>
                 </tr>);
             })}
-            {players.length === 0 && (<tr><td colSpan={7} className="p-2 text-center text-slate-400">Sin jugadores.</td></tr>)}
+            {players.length === 0 && (<tr><td colSpan={10} className="p-2 text-center text-slate-400">Sin jugadores.</td></tr>)}
           </tbody>
         </table>
       </div>
