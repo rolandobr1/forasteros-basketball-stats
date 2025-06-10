@@ -18,16 +18,29 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
+        darkMode: 'class', // Enable class-based dark mode
         theme: {
           extend: {
             colors: {
+              // Default (Light Theme) colors
+              'brand-bg-light': '#f8f9fa',
+              'brand-surface-light': '#ffffff',
+              'brand-accent-light': '#e53e3e', // Lighter red for light mode accent
+              'brand-button-light': '#6c757d', 
+              'brand-button-hover-light': '#5a6268',
+              'brand-text-primary-light': '#212529',
+              'brand-text-secondary-light': '#6c757d',
+              'brand-border-light': '#dee2e6',
+
+              // Dark Theme colors (apply with dark: prefix)
               'brand-dark': '#1a202c', 
               'brand-surface': '#2d3748', 
               'brand-accent': '#a50515', 
               'brand-button': '#6B7280', 
               'brand-button-hover': '#4B5563', 
               'brand-text-primary': '#e2e8f0', 
-              'brand-text-secondary': '#a0aec0', 
+              'brand-text-secondary': '#a0aec0',
+              'brand-border': '#4a5568',
             }
           }
         }
@@ -47,7 +60,7 @@
 </script>
 <link rel="stylesheet" href="/index.css">
 </head>
-  <body>
+  <body class="bg-brand-bg-light dark:bg-brand-dark">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script> 
   <script type="module" src="/index.tsx"></script>

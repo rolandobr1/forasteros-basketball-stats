@@ -36,8 +36,8 @@ const LoginPage: React.FC = () => {
               type="text"
               autoComplete="username"
               placeholder="Usuario"
-              className="w-full px-4 py-2.5 rounded-md bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-brand-accent placeholder-slate-400"
-              disabled 
+              className="w-full px-4 py-2.5 rounded-md bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-brand-accent placeholder-slate-400 select-auto"
+              
             />
           </div>
           <div>
@@ -48,8 +48,8 @@ const LoginPage: React.FC = () => {
               type="password"
               autoComplete="current-password"
               placeholder="Contraseña"
-              className="w-full px-4 py-2.5 rounded-md bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-brand-accent placeholder-slate-400"
-              disabled
+              className="w-full px-4 py-2.5 rounded-md bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-brand-accent placeholder-slate-400 select-auto"
+              
             />
           </div>
         </div>

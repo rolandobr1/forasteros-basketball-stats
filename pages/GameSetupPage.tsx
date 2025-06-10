@@ -1,16 +1,17 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Player, Game, GameSettings, TeamGameInfo, GamePhase, initialPlayerStats, Team } from '../types';
 import { INITIAL_GAME_SETTINGS } from '../constants';
-import PlayerSelectionModal from '../components/PlayerSelectionModal'; // To be created
+import PlayerSelectionModal from '../components/PlayerSelectionModal'; 
 import AlertDialog from '../components/AlertDialog';
 
 interface GameSetupPageProps {
   roster: Player[];
   onGameSetup: (game: Game) => void;
   currentGame: Game | null;
-  teams?: Team[]; // Make teams prop optional initially, App.tsx will uncomment it
+  teams?: Team[]; 
 }
 
 const GameSetupPage: React.FC<GameSetupPageProps> = ({ roster, onGameSetup, currentGame, teams = [] }) => {
@@ -29,11 +30,16 @@ const GameSetupPage: React.FC<GameSetupPageProps> = ({ roster, onGameSetup, curr
   const [selectedHomeTeamId, setSelectedHomeTeamId] = useState<string>('');
   const [selectedAwayTeamId, setSelectedAwayTeamId] = useState<string>('');
 
+  const commonInputClasses = "w-full p-2 rounded bg-slate-200 dark:bg-slate-700 text-brand-text-primary-light dark:text-white border border-brand-border-light dark:border-slate-600 focus:border-brand-accent-light dark:focus:border-brand-accent select-auto";
+  const labelClasses = "block text-sm font-medium text-brand-text-secondary-light dark:text-slate-300";
+  const sectionClasses = "bg-brand-surface-light dark:bg-brand-surface p-6 rounded-lg shadow-md space-y-4";
+  const buttonClasses = "w-full py-2 px-4 bg-brand-button-light dark:bg-brand-button hover:bg-brand-button-hover-light dark:hover:bg-brand-button-hover text-brand-text-primary-light dark:text-white rounded-md mt-1";
+
+
   useEffect(() => {
     if (currentGame && currentGame.gamePhase !== GamePhase.FINISHED) {
        setAlertInfo({isOpen: true, title: "Partido en Curso", message: "Ya hay un partido en curso. Finalízalo para empezar uno nuevo."});
     }
-    // Initialize settings with allowFoulOuts from INITIAL_GAME_SETTINGS
     setSettings(prevSettings => ({
         ...prevSettings,
         allowFoulOuts: INITIAL_GAME_SETTINGS.allowFoulOuts,
@@ -59,10 +65,10 @@ const GameSetupPage: React.FC<GameSetupPageProps> = ({ roster, onGameSetup, curr
         setHomeTeamName(selectedTeam.name);
         const playersFromRoster = selectedTeam.playerIds
           .map(id => roster.find(p => p.id === id))
-          .filter(p => p && !awayPlayers.some(ap => ap.id === p.id)) as Player[]; // Filter out players already in away team
+          .filter(p => p && !awayPlayers.some(ap => ap.id === p.id)) as Player[];
         setHomePlayers(playersFromRoster);
-      } else { // "Manual selection"
-        setHomeTeamName("Local"); // Reset or keep as is
+      } else { 
+        setHomeTeamName("Local"); 
         setHomePlayers([]);
       }
     } else {
@@ -71,7 +77,7 @@ const GameSetupPage: React.FC<GameSetupPageProps> = ({ roster, onGameSetup, curr
         setAwayTeamName(selectedTeam.name);
         const playersFromRoster = selectedTeam.playerIds
           .map(id => roster.find(p => p.id === id))
-          .filter(p => p && !homePlayers.some(hp => hp.id === p.id)) as Player[]; // Filter out players already in home team
+          .filter(p => p && !homePlayers.some(hp => hp.id === p.id)) as Player[]; 
         setAwayPlayers(playersFromRoster);
       } else {
         setAwayTeamName("Visitante");
@@ -83,10 +89,10 @@ const GameSetupPage: React.FC<GameSetupPageProps> = ({ roster, onGameSetup, curr
   const handleTeamNameChange = (teamType: 'home' | 'away', name: string) => {
     if (teamType === 'home') {
         setHomeTeamName(name);
-        if (selectedHomeTeamId) setSelectedHomeTeamId(''); // Detach from predefined if name changes
+        if (selectedHomeTeamId) setSelectedHomeTeamId(''); 
     } else {
         setAwayTeamName(name);
-        if (selectedAwayTeamId) setSelectedAwayTeamId(''); // Detach
+        if (selectedAwayTeamId) setSelectedAwayTeamId('');
     }
   };
 
@@ -101,7 +107,6 @@ const GameSetupPage: React.FC<GameSetupPageProps> = ({ roster, onGameSetup, curr
       return;
     }
     
-    // Check for overlapping players
     const homePlayerIds = new Set(homePlayers.map(p => p.id));
     const overlappingPlayer = awayPlayers.find(p => homePlayerIds.has(p.id));
     if (overlappingPlayer) {
@@ -111,15 +116,13 @@ const GameSetupPage: React.FC<GameSetupPageProps> = ({ roster, onGameSetup, curr
 
     const finalSettings: GameSettings = {
         ...settings,
-        // Ensure maxPersonalFouls is positive if allowFoulOuts is true
         maxPersonalFouls: settings.allowFoulOuts ? Math.max(1, settings.maxPersonalFouls) : settings.maxPersonalFouls,
     };
-
 
     const createTeamInfo = (name: string, players: Player[]): TeamGameInfo => ({
       name,
       players,
-      onCourt: players.slice(0, 5), // First 5 players on court
+      onCourt: players.slice(0, 5),
       bench: players.slice(5),
       stats: players.reduce((acc, p) => ({ ...acc, [p.id]: { ...initialPlayerStats } }), {}),
       score: 0,
@@ -135,12 +138,12 @@ const GameSetupPage: React.FC<GameSetupPageProps> = ({ roster, onGameSetup, curr
       currentQuarter: 1,
       isOvertime: false,
       gamePhase: GamePhase.WARMUP, 
-      currentTimeRemainingInPhase: finalSettings.quarterDuration, // Warmup often same as quarter duration
+      currentTimeRemainingInPhase: finalSettings.quarterDuration,
       startTime: null,
       endTime: null,
       gameLog: [],
       winningTeam: null,
-      timerIsRunning: false, // Timer is not running by default on setup
+      timerIsRunning: false, 
       lastTickTimestamp: null,
     };
     onGameSetup(newGame);
@@ -148,35 +151,33 @@ const GameSetupPage: React.FC<GameSetupPageProps> = ({ roster, onGameSetup, curr
   };
 
   const handleAlertClose = () => {
-    // If the alert was for "Partido en Curso", navigate to the game page.
     if (alertInfo.title === "Partido en Curso" && currentGame && currentGame.gamePhase !== GamePhase.FINISHED) {
       navigate('/game');
     }
-    // Always reset the alert info to close the dialog.
     setAlertInfo({ isOpen: false, title: '', message: '' });
   };
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-semibold text-center text-white mb-6">Configurar Nuevo Partido</h2>
+      <h2 className="text-3xl font-semibold text-center text-brand-text-primary-light dark:text-white mb-6">Configurar Nuevo Partido</h2>
 
-      <div className="bg-brand-surface p-6 rounded-lg shadow-md space-y-4">
-        <h3 className="text-xl font-medium text-white">Ajustes del Partido</h3>
+      <div className={sectionClasses}>
+        <h3 className="text-xl font-medium text-brand-text-primary-light dark:text-white">Ajustes del Partido</h3>
         <div>
-          <label htmlFor="quarters" className="block text-sm font-medium text-slate-300">Número de Cuartos</label>
-          <input type="number" name="quarters" id="quarters" value={settings.quarters} onChange={handleSettingsChange} className="mt-1 block w-full p-2 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-brand-accent" min="1" />
+          <label htmlFor="quarters" className={labelClasses}>Número de Cuartos</label>
+          <input type="number" name="quarters" id="quarters" value={settings.quarters} onChange={handleSettingsChange} className={`mt-1 block w-full ${commonInputClasses}`} min="1" />
         </div>
         <div>
-          <label htmlFor="quarterDuration" className="block text-sm font-medium text-slate-300">Duración del Cuarto (minutos)</label>
-          <input type="number" name="quarterDuration" id="quarterDuration" value={settings.quarterDuration / 60} onChange={(e) => setSettings(s => ({...s, quarterDuration: parseInt(e.target.value)*60}))} className="mt-1 block w-full p-2 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-brand-accent" min="1" />
+          <label htmlFor="quarterDuration" className={labelClasses}>Duración del Cuarto (minutos)</label>
+          <input type="number" name="quarterDuration" id="quarterDuration" value={settings.quarterDuration / 60} onChange={(e) => setSettings(s => ({...s, quarterDuration: parseInt(e.target.value)*60}))} className={`mt-1 block w-full ${commonInputClasses}`} min="1" />
         </div>
         <div>
-          <label htmlFor="overtimeDuration" className="block text-sm font-medium text-slate-300">Duración Prórroga (minutos)</label>
-          <input type="number" name="overtimeDuration" id="overtimeDuration" value={settings.overtimeDuration / 60} onChange={(e) => setSettings(s => ({...s, overtimeDuration: parseInt(e.target.value)*60}))} className="mt-1 block w-full p-2 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-brand-accent" min="1" />
+          <label htmlFor="overtimeDuration" className={labelClasses}>Duración Prórroga (minutos)</label>
+          <input type="number" name="overtimeDuration" id="overtimeDuration" value={settings.overtimeDuration / 60} onChange={(e) => setSettings(s => ({...s, overtimeDuration: parseInt(e.target.value)*60}))} className={`mt-1 block w-full ${commonInputClasses}`} min="1" />
         </div>
         <div>
-          <label htmlFor="foulsForBonus" className="block text-sm font-medium text-slate-300">Faltas para Bonus</label>
-          <input type="number" name="foulsForBonus" id="foulsForBonus" value={settings.foulsForBonus} onChange={handleSettingsChange} className="mt-1 block w-full p-2 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-brand-accent" min="1" />
+          <label htmlFor="foulsForBonus" className={labelClasses}>Faltas para Bonus</label>
+          <input type="number" name="foulsForBonus" id="foulsForBonus" value={settings.foulsForBonus} onChange={handleSettingsChange} className={`mt-1 block w-full ${commonInputClasses}`} min="1" />
         </div>
         <div className="flex items-center space-x-3">
           <input
@@ -185,55 +186,55 @@ const GameSetupPage: React.FC<GameSetupPageProps> = ({ roster, onGameSetup, curr
             id="allowFoulOuts"
             checked={settings.allowFoulOuts}
             onChange={handleSettingsChange}
-            className="h-4 w-4 text-brand-accent bg-slate-700 border-slate-600 rounded focus:ring-brand-accent"
+            className="h-4 w-4 text-brand-accent-light dark:text-brand-accent bg-slate-200 dark:bg-slate-700 border-brand-border-light dark:border-slate-600 rounded focus:ring-brand-accent-light dark:focus:ring-brand-accent"
           />
-          <label htmlFor="allowFoulOuts" className="text-sm font-medium text-slate-300">Permitir Expulsiones por Faltas</label>
+          <label htmlFor="allowFoulOuts" className={labelClasses}>Permitir Expulsiones por Faltas</label>
         </div>
         <div>
-          <label htmlFor="maxPersonalFouls" className="block text-sm font-medium text-slate-300">Faltas para Expulsión</label>
+          <label htmlFor="maxPersonalFouls" className={labelClasses}>Faltas para Expulsión</label>
           <input 
             type="number" 
             name="maxPersonalFouls" 
             id="maxPersonalFouls" 
             value={settings.maxPersonalFouls} 
             onChange={handleSettingsChange} 
-            className="mt-1 block w-full p-2 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-brand-accent disabled:opacity-70 disabled:bg-slate-800" 
+            className={`mt-1 block w-full ${commonInputClasses} disabled:opacity-70 disabled:bg-slate-300 dark:disabled:bg-slate-800`} 
             min="1"
             disabled={!settings.allowFoulOuts} 
           />
            {!settings.allowFoulOuts && (
-            <p className="text-xs text-slate-400 mt-1">Activa "Permitir Expulsiones" para modificar.</p>
+            <p className="text-xs text-brand-text-secondary-light dark:text-slate-400 mt-1">Activa "Permitir Expulsiones" para modificar.</p>
           )}
         </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-brand-surface p-6 rounded-lg shadow-md space-y-3">
-          <h3 className="text-xl font-medium text-white">Equipo Local</h3>
-          <input type="text" placeholder="Nombre Equipo Local" value={homeTeamName} onChange={(e) => handleTeamNameChange('home', e.target.value)} className="w-full p-2 rounded bg-slate-700 text-white border border-slate-600" />
+        <div className={sectionClasses}>
+          <h3 className="text-xl font-medium text-brand-text-primary-light dark:text-white">Equipo Local</h3>
+          <input type="text" placeholder="Nombre Equipo Local" value={homeTeamName} onChange={(e) => handleTeamNameChange('home', e.target.value)} className={commonInputClasses} />
           {teams.length > 0 && (
-            <select value={selectedHomeTeamId} onChange={(e) => handlePredefinedTeamSelect('home', e.target.value)} className="w-full p-2 rounded bg-slate-700 text-white border border-slate-600 mt-1">
+            <select value={selectedHomeTeamId} onChange={(e) => handlePredefinedTeamSelect('home', e.target.value)} className={`w-full mt-1 ${commonInputClasses}`}>
               <option value="">Cargar Equipo Predefinido (Manual)</option>
               {teams.map(team => <option key={team.id} value={team.id}>{team.name}</option>)}
             </select>
           )}
-          <button onClick={() => setIsHomeSelectionOpen(true)} className="w-full py-2 px-4 bg-brand-button hover:bg-brand-button-hover text-white rounded-md mt-1">Seleccionar Jugadores ({homePlayers.length})</button>
-          <ul className="text-sm text-slate-300 list-disc list-inside pl-2 max-h-20 overflow-y-auto">
+          <button onClick={() => setIsHomeSelectionOpen(true)} className={buttonClasses}>Seleccionar Jugadores ({homePlayers.length})</button>
+          <ul className="text-sm text-brand-text-secondary-light dark:text-slate-300 list-disc list-inside pl-2 max-h-20 overflow-y-auto">
             {homePlayers.map(p => <li key={p.id} className="truncate" title={`${p.name} (#${p.number})`}>{p.name} (#{p.number})</li>)}
           </ul>
         </div>
 
-        <div className="bg-brand-surface p-6 rounded-lg shadow-md space-y-3">
-          <h3 className="text-xl font-medium text-white">Equipo Visitante</h3>
-          <input type="text" placeholder="Nombre Equipo Visitante" value={awayTeamName} onChange={(e) => handleTeamNameChange('away', e.target.value)} className="w-full p-2 rounded bg-slate-700 text-white border border-slate-600" />
+        <div className={sectionClasses}>
+          <h3 className="text-xl font-medium text-brand-text-primary-light dark:text-white">Equipo Visitante</h3>
+          <input type="text" placeholder="Nombre Equipo Visitante" value={awayTeamName} onChange={(e) => handleTeamNameChange('away', e.target.value)} className={commonInputClasses} />
           {teams.length > 0 && (
-            <select value={selectedAwayTeamId} onChange={(e) => handlePredefinedTeamSelect('away', e.target.value)} className="w-full p-2 rounded bg-slate-700 text-white border border-slate-600 mt-1">
+            <select value={selectedAwayTeamId} onChange={(e) => handlePredefinedTeamSelect('away', e.target.value)} className={`w-full mt-1 ${commonInputClasses}`}>
               <option value="">Cargar Equipo Predefinido (Manual)</option>
               {teams.map(team => <option key={team.id} value={team.id}>{team.name}</option>)}
             </select>
           )}
-          <button onClick={() => setIsAwaySelectionOpen(true)} className="w-full py-2 px-4 bg-brand-button hover:bg-brand-button-hover text-white rounded-md mt-1">Seleccionar Jugadores ({awayPlayers.length})</button>
-          <ul className="text-sm text-slate-300 list-disc list-inside pl-2 max-h-20 overflow-y-auto">
+          <button onClick={() => setIsAwaySelectionOpen(true)} className={buttonClasses}>Seleccionar Jugadores ({awayPlayers.length})</button>
+          <ul className="text-sm text-brand-text-secondary-light dark:text-slate-300 list-disc list-inside pl-2 max-h-20 overflow-y-auto">
             {awayPlayers.map(p => <li key={p.id} className="truncate" title={`${p.name} (#${p.number})`}>{p.name} (#{p.number})</li>)}
           </ul>
         </div>

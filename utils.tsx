@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { PiBasketball, PiSignOutBold, PiQuestion } from 'react-icons/pi'; // Import the new icon
+import { PiBasketball, PiSignOutBold, PiQuestion, PiSunDimBold, PiMoonStarsBold } from 'react-icons/pi'; // Import the new icon
 import { FaRegTrashAlt, FaExchangeAlt } from 'react-icons/fa'; // Import FaRegTrashAlt and FaExchangeAlt
 import { GiBasketballBasket } from 'react-icons/gi'; // Added for LiveGameIcon
 import { IoStatsChart } from "react-icons/io5"; // Added for StatsChartIcon
@@ -78,36 +79,24 @@ export const advanceGameTime = (currentGame: Game, elapsedSeconds: number): Game
           currentQuarter++; // Advance to prepare for the quarter *after* this break
           needsFoulReset = true;
         } else { // End of Q4 (or last regulation quarter)
-          // Decision to go to OT or Finish is handled by user actions,
-          // here we just transition to a state that implies period end.
-          // For simplicity, let's assume it might go to an OT_BREAK type phase or become FINISHED.
-          // If scores are tied, GamePage should handle offering OT.
-          // If not, GamePage handles finishing.
-          // This function's job is to tick down time. If it hits zero, it's a break.
-          gamePhase = GamePhase.OVERTIME_BREAK; // Placeholder for "end of regulation, decide next"
+          gamePhase = GamePhase.OVERTIME_BREAK; 
           currentTimeRemainingInPhase = settings.breakDuration || 60;
-          // currentQuarter will be numQuarters here. If OT starts, GamePage will set it to numQuarters + 1.
-          needsFoulReset = true; // Fouls reset if OT starts
+          needsFoulReset = true; 
         }
       } else { // Overtime period ended
         gamePhase = GamePhase.OVERTIME_BREAK;
         currentTimeRemainingInPhase = settings.breakDuration || 60;
-        currentQuarter++; // Prepare for next OT's break
+        currentQuarter++; 
         needsFoulReset = true;
       }
     } else if (gamePhase === GamePhase.QUARTER_BREAK || gamePhase === GamePhase.HALFTIME || gamePhase === GamePhase.OVERTIME_BREAK) {
       gamePhase = GamePhase.IN_PROGRESS;
-      // currentQuarter is already set for the upcoming play period.
       currentTimeRemainingInPhase = isOvertime ? settings.overtimeDuration : settings.quarterDuration;
-      // Fouls were reset when entering the break.
     } else {
-      // GamePhase.NOT_STARTED, GamePhase.TIMEOUT (if timerIsRunning was true), GamePhase.FINISHED
-      // These states should not have an actively ticking timer managed by this loop.
-      // If TIMEOUT, timerIsRunning should be false.
-      currentTimeRemainingInPhase = 0; // Stop processing.
-      break; // Exit while loop
+      currentTimeRemainingInPhase = 0; 
+      break; 
     }
-    currentTimeRemainingInPhase -= timeOverShot; // Apply overshoot to the new phase's time.
+    currentTimeRemainingInPhase -= timeOverShot; 
   }
 
   if (needsFoulReset) {
@@ -124,13 +113,11 @@ export const advanceGameTime = (currentGame: Game, elapsedSeconds: number): Game
     homeTeam,
     awayTeam,
     startTime,
-    // timerIsRunning and lastTickTimestamp are managed by the caller (App.tsx)
   };
 };
 
 
 // --- SVG Icons ---
-// Updated BasketballIcon to use PiBasketball
 export const BasketballIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <PiBasketball {...props} />
 );
@@ -183,7 +170,6 @@ export const EditIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   </svg>
 );
 
-// Updated DeleteIcon to use FaRegTrashAlt
 export const DeleteIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <FaRegTrashAlt {...props} />
 );
@@ -311,4 +297,24 @@ export const SwapIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 export const RestartIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <VscDebugRestart {...props} />
+);
+
+export const CheckCircleIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+  </svg>
+);
+
+export const CircleIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+  </svg>
+);
+
+export const SunIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <PiSunDimBold {...props} />
+);
+
+export const MoonIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <PiMoonStarsBold {...props} />
 );

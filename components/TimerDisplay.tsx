@@ -1,16 +1,16 @@
 
+
 import React from 'react';
 import { GameSettings, GamePhase, Game } from '../types';
 import { formatTime, PlayIcon, PauseIcon, ArrowUturnLeftIcon, ChevronLeftIcon, ChevronRightIcon } from '../utils';
 
 interface TimerDisplayProps {
-  gameData: Game; // Pass the whole game object
+  gameData: Game; 
   onStartTimer: () => void;
   onPauseTimer: () => void;
   onResetTimer: () => void;
   onGoToNextPeriod: () => void;
   onGoToPrevPeriod: () => void;
-  // onAdvancePeriodRequested is implicitly handled by timer logic now
 }
 
 const TimerDisplay: React.FC<TimerDisplayProps> = ({
@@ -43,7 +43,7 @@ const TimerDisplay: React.FC<TimerDisplayProps> = ({
     if (gamePhase === GamePhase.IN_PROGRESS) {
       return isOvertime ? `Prórroga ${currentQuarter - settings.quarters}` : `Cuarto ${currentQuarter}`;
     }
-    if (gamePhase === GamePhase.QUARTER_BREAK) return `Descanso (Fin Q${currentQuarter -1 })`; // Quarter already advanced
+    if (gamePhase === GamePhase.QUARTER_BREAK) return `Descanso (Fin Q${currentQuarter -1 })`;
     if (gamePhase === GamePhase.HALFTIME) return "Medio Tiempo";
     if (gamePhase === GamePhase.OVERTIME_BREAK) return `Descanso Prórroga (Fin OT${currentQuarter - 1 - settings.quarters})`;
     if (gamePhase === GamePhase.TIMEOUT) return "Tiempo Muerto";
@@ -59,31 +59,34 @@ const TimerDisplay: React.FC<TimerDisplayProps> = ({
             gamePhase === GamePhase.QUARTER_BREAK || gamePhase === GamePhase.HALFTIME || gamePhase === GamePhase.OVERTIME_BREAK) return 'Pausar';
         return 'Pausar'; 
     }
-    // Not running:
     if (gamePhase === GamePhase.WARMUP || gamePhase === GamePhase.NOT_STARTED) {
         return 'Iniciar Partido';
     }
     if (gamePhase === GamePhase.QUARTER_BREAK || gamePhase === GamePhase.HALFTIME || gamePhase === GamePhase.OVERTIME_BREAK) {
       return 'Reanudar Descanso'; 
     }
-    if (gamePhase === GamePhase.TIMEOUT || gamePhase === GamePhase.IN_PROGRESS ) { // IN_PROGRESS but timer not running (e.g. just after period end)
+    if (gamePhase === GamePhase.TIMEOUT || gamePhase === GamePhase.IN_PROGRESS ) {
         return 'Continuar Juego';
     }
     return 'Iniciar'; 
   };
 
   const isStartButtonDisabled = gamePhase === GamePhase.FINISHED;
-  // Reset button should be available if timer is paused, or phase is suitable for reset (like timeout, or start of period)
   const isResetButtonDisabled = gamePhase === GamePhase.FINISHED || timerIsRunning;
-  
   const isPrevPeriodDisabled = gamePhase === GamePhase.FINISHED || timerIsRunning || (currentQuarter === 1 && !isOvertime && gamePhase !== GamePhase.QUARTER_BREAK && gamePhase !== GamePhase.HALFTIME && gamePhase !== GamePhase.OVERTIME_BREAK );
   const isNextPeriodDisabled = gamePhase === GamePhase.FINISHED || timerIsRunning;
 
+  const bgSurface = "bg-brand-surface-light dark:bg-brand-surface";
+  const textSecondary = "text-brand-text-secondary-light dark:text-slate-300";
+  const timerColor = timerIsRunning ? 'text-green-500 dark:text-green-400' : (gamePhase === GamePhase.FINISHED ? 'text-slate-400 dark:text-slate-500' : 'text-red-600 dark:text-red-400');
+  const borderDefault = "border-brand-border-light dark:border-slate-700";
+  const buttonSecondary = "bg-brand-button-light dark:bg-brand-button hover:bg-brand-button-hover-light dark:hover:bg-brand-button-hover text-brand-text-primary-light dark:text-white";
+  const periodButton = "bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-brand-text-primary-light dark:text-white";
 
   return (
-    <div className="bg-brand-surface p-4 rounded-lg shadow-md text-center space-y-3">
-      <div className="text-sm text-slate-300 font-medium">{getPhaseDisplay()}</div>
-      <div className={`text-6xl font-mono font-bold ${timerIsRunning ? 'text-green-400' : (gamePhase === GamePhase.FINISHED ? 'text-slate-500' : 'text-red-400')}`}>
+    <div className={`${bgSurface} p-4 rounded-lg shadow-md text-center space-y-3`}>
+      <div className={`text-sm ${textSecondary} font-medium`}>{getPhaseDisplay()}</div>
+      <div className={`text-6xl font-mono font-bold ${timerColor}`}>
         {formatTime(Math.max(0,currentTimeRemainingInPhase))}
       </div>
       <div className="flex justify-center space-x-3">
@@ -100,17 +103,17 @@ const TimerDisplay: React.FC<TimerDisplayProps> = ({
         <button
           onClick={onResetTimer}
           disabled={isResetButtonDisabled}
-          className="px-4 py-2 bg-brand-button hover:bg-brand-button-hover text-white rounded-md font-semibold flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`px-4 py-2 ${buttonSecondary} rounded-md font-semibold flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           <ArrowUturnLeftIcon />
           <span>Reset Tiempo</span>
         </button>
       </div>
-      <div className="flex justify-center space-x-3 pt-2 border-t border-slate-700 mt-3">
+      <div className={`flex justify-center space-x-3 pt-2 border-t ${borderDefault} mt-3`}>
         <button
             onClick={onGoToPrevPeriod}
             disabled={isPrevPeriodDisabled}
-            className="px-3 py-1.5 bg-slate-600 hover:bg-slate-500 text-white rounded-md text-xs font-semibold flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`px-3 py-1.5 ${periodButton} rounded-md text-xs font-semibold flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed`}
             aria-label="Periodo Anterior"
         >
             <ChevronLeftIcon />
@@ -119,7 +122,7 @@ const TimerDisplay: React.FC<TimerDisplayProps> = ({
         <button
             onClick={onGoToNextPeriod}
             disabled={isNextPeriodDisabled}
-            className="px-3 py-1.5 bg-slate-600 hover:bg-slate-500 text-white rounded-md text-xs font-semibold flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`px-3 py-1.5 ${periodButton} rounded-md text-xs font-semibold flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed`}
             aria-label="Siguiente Periodo"
         >
             <span>Periodo Sig.</span>

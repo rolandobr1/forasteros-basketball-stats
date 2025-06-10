@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { QuestionIcon, XMarkIcon } from '../utils'; // Assuming QuestionIcon will be added to utils
 import AlertDialog from '../components/AlertDialog';
@@ -117,7 +118,7 @@ const HelpPage: React.FC = () => {
               value={formState.name}
               onChange={handleInputChange}
               required
-              className="w-full p-2.5 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent"
+              className="w-full p-2.5 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent select-auto"
             />
           </div>
           <div>
@@ -129,7 +130,7 @@ const HelpPage: React.FC = () => {
               value={formState.email}
               onChange={handleInputChange}
               required
-              className="w-full p-2.5 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent"
+              className="w-full p-2.5 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent select-auto"
             />
           </div>
           <div>
@@ -141,7 +142,7 @@ const HelpPage: React.FC = () => {
               value={formState.subject}
               onChange={handleInputChange}
               required
-              className="w-full p-2.5 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent"
+              className="w-full p-2.5 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent select-auto"
             />
           </div>
           <div>
@@ -153,7 +154,7 @@ const HelpPage: React.FC = () => {
               value={formState.message}
               onChange={handleInputChange}
               required
-              className="w-full p-2.5 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent"
+              className="w-full p-2.5 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent select-auto"
             ></textarea>
           </div>
           <button

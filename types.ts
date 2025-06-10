@@ -1,4 +1,5 @@
 
+
 // Defines the structure for a player
 export interface Player {
   id: string;
@@ -121,7 +122,7 @@ export interface Game {
 export interface GameAction {
   id: string;
   timestamp: number; // Date.now()
-  type: 'stat_update' | 'substitution' | 'timer_change' | 'foul_update' | 'score_update';
+  type: 'stat_update' | 'substitution' | 'timer_change' | 'foul_update' | 'score_update' | 'player_added_to_team';
   payload: any; // Specific details of the action
   teamId?: 'home' | 'away';
   playerId?: string;

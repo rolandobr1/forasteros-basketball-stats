@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Player, PlayerStats, StatType, TeamType } from '../types';
 import { STAT_TYPE_LABELS, POINTS_STATS, OTHER_STATS } from '../constants';
@@ -10,10 +11,9 @@ interface PlayerStatsModalProps {
   player: Player;
   teamType: TeamType;
   currentStats: PlayerStats;
-  onSaveStats: (playerId: string, teamType: TeamType, newStats: PlayerStats) => void;
+  onSaveStats: (player: Player, teamType: TeamType, newStats: PlayerStats) => void;
   maxPersonalFouls: number;
   allowFoulOuts: boolean;
-  openMode?: 'auto' | 'persistent'; // Default will be 'auto'
 }
 
 const StatButton: React.FC<{ 
@@ -22,15 +22,15 @@ const StatButton: React.FC<{
   onIncrement: () => void; 
   onDecrement: () => void; 
   disabled?: boolean;
-  statType: StatType; // Added to determine if it's an attempted shot
-}> = 
-  ({ label, value, onIncrement, onDecrement, disabled = false, statType }) => {
-    const isAttemptedShot = statType.endsWith('A'); // e.g., "1PA", "2PA", "3PA"
-    const labelColor = isAttemptedShot ? 'text-red-400' : 'text-slate-300';
-    const valueColor = value < 0 ? 'text-red-400' : 'text-white'; // For potential negative values
+  statType: StatType;
+}> = ({ label, value, onIncrement, onDecrement, disabled = false, statType }) => {
+    const isAttemptedShot = statType.endsWith('A');
+    const labelColor = isAttemptedShot ? 'text-red-500 dark:text-red-400' : 'text-brand-text-secondary-light dark:text-slate-300';
+    const valueColor = value < 0 ? 'text-red-500 dark:text-red-400' : 'text-brand-text-primary-light dark:text-white';
+    const buttonBg = 'bg-slate-200 dark:bg-slate-700';
 
     return (
-      <div className="flex items-center justify-between p-2 bg-slate-700 rounded">
+      <div className={`flex items-center justify-between p-2 ${buttonBg} rounded`}>
         <span className={`text-sm ${labelColor}`}>{label}</span>
         <div className="flex items-center space-x-2">
           <button onClick={onDecrement} disabled={disabled || value <= 0} className="p-1 bg-red-600 hover:bg-red-500 rounded disabled:opacity-50"><MinusIcon /></button>
@@ -50,7 +50,6 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({
   onSaveStats,
   maxPersonalFouls,
   allowFoulOuts,
-  openMode = 'auto', // Default to 'auto' for auto-save behavior
 }) => {
   const [stats, setStats] = useState<PlayerStats>(currentStats);
   const [alertInfo, setAlertInfo] = useState<{ isOpen: boolean, title: string, message: string }>({ isOpen: false, title: '', message: '' });
@@ -60,7 +59,7 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({
   }, [isOpen, currentStats]);
 
   const handleStatChange = useCallback((statType: StatType, increment: boolean) => {
-    const newLocalStats = (currentLocalStats: PlayerStats) => {
+    setStats(currentLocalStats => {
       const oldValue = currentLocalStats[statType] || 0;
       const newValue = oldValue + (increment ? 1 : -1);
       const newStatValue = Math.max(0, newValue);
@@ -78,40 +77,33 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({
       }
       
       if (allowFoulOuts && statType === StatType.FOULS_PERSONAL && newStatValue >= maxPersonalFouls) {
-        if (newStatValue === maxPersonalFouls && increment) {
+        if (newStatValue === maxPersonalFouls && increment) { 
             setAlertInfo({isOpen: true, title: "Jugador Expulsado", message: `${player.name} ha alcanzado el máximo de ${maxPersonalFouls} faltas personales.`});
         }
       }
       return updatedStats;
-    };
-
-    setStats(prevLocalStats => {
-        const resultingStats = newLocalStats(prevLocalStats);
-        if (openMode === 'auto') {
-            onSaveStats(player.id, teamType, resultingStats);
-            onClose(); 
-        }
-        return resultingStats;
     });
+  }, [allowFoulOuts, maxPersonalFouls, player.name]);
 
-  }, [player.id, teamType, onSaveStats, onClose, openMode, allowFoulOuts, maxPersonalFouls, player.name]);
-
-  const handleSavePersistentMode = () => {
-    onSaveStats(player.id, teamType, stats);
+  const handleSaveAndClose = () => {
+    onSaveStats(player, teamType, stats); 
     onClose();
   };
 
   if (!isOpen) return null;
   
   const playerIsEffectivelyFouledOut = allowFoulOuts && (stats[StatType.FOULS_PERSONAL] || 0) >= maxPersonalFouls;
+  const textPrimary = "text-brand-text-primary-light dark:text-brand-text-primary";
+  const bgSurface = "bg-brand-surface-light dark:bg-brand-surface";
+  const borderDefault = "border-brand-border-light dark:border-slate-700";
 
   return (
     <>
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
-      <div className="bg-brand-surface rounded-lg shadow-xl p-6 w-full max-w-lg max-h-[90vh] flex flex-col">
+      <div className={`${bgSurface} rounded-lg shadow-xl p-6 w-full max-w-lg max-h-[90vh] flex flex-col`}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-white">Estadísticas de {player.name} (#{player.number})</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white"><XMarkIcon /></button>
+          <h2 className={`text-xl font-semibold ${textPrimary}`}>Estadísticas de {player.name} (#{player.number})</h2>
+          <button onClick={onClose} className="text-brand-text-secondary-light dark:text-slate-400 hover:text-brand-text-primary-light dark:hover:text-white"><XMarkIcon /></button>
         </div>
 
         {playerIsEffectivelyFouledOut && (
@@ -127,7 +119,7 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({
 
         <div className="overflow-y-auto mb-4 flex-grow pr-2 space-y-3">
           <div>
-            <h3 className="text-md font-medium text-white mb-1">Puntos:</h3>
+            <h3 className={`text-md font-medium ${textPrimary} mb-1`}>Puntos:</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {POINTS_STATS.map(statKey => (
                 <StatButton
@@ -143,7 +135,7 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({
             </div>
           </div>
           <div>
-            <h3 className="text-md font-medium text-white mb-1">Otras Estadísticas:</h3>
+            <h3 className={`text-md font-medium ${textPrimary} mb-1`}>Otras Estadísticas:</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {OTHER_STATS.map(statKey => (
                 <StatButton
@@ -160,12 +152,10 @@ const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({
           </div>
         </div>
         
-        {openMode === 'persistent' && (
-          <div className="flex justify-end space-x-3 pt-4 border-t border-slate-700">
-            <button onClick={onClose} className="px-4 py-2 bg-slate-500 text-white rounded-md hover:bg-slate-400">Cancelar</button>
-            <button onClick={handleSavePersistentMode} className="px-4 py-2 bg-brand-accent text-white rounded-md hover:bg-opacity-90">Guardar Estadísticas</button>
-          </div>
-        )}
+        <div className={`flex justify-end space-x-3 pt-4 border-t ${borderDefault}`}>
+          <button onClick={onClose} className="px-4 py-2 bg-brand-button-light dark:bg-slate-500 text-brand-text-primary-light dark:text-white rounded-md hover:bg-brand-button-hover-light dark:hover:bg-slate-400">Cancelar</button>
+          <button onClick={handleSaveAndClose} className="px-4 py-2 bg-brand-accent-light dark:bg-brand-accent text-white rounded-md hover:bg-opacity-90">Guardar Estadísticas</button>
+        </div>
       </div>
     </div>
      <AlertDialog
