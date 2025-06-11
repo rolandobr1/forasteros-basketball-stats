@@ -1,5 +1,4 @@
 
-
 // Defines the structure for a player
 export interface Player {
   id: string;
@@ -147,4 +146,11 @@ export interface ConfirmDialogProps extends DialogProps {
 
 export interface AlertProps extends DialogProps {
   confirmText?: string;
+}
+
+export interface PredefinedTeamSelectionModalProps extends Omit<DialogProps, 'title' | 'children'> {
+  allTeams: Team[];
+  onTeamSelected: (team: Team) => void;
+  currentSelectedTeamId?: string;
+  title?: string;
 }

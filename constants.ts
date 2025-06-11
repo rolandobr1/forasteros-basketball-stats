@@ -1,5 +1,4 @@
 
-
 import { GameSettings, StatType } from './types';
 
 export const LOCAL_STORAGE_KEYS = {
@@ -7,7 +6,6 @@ export const LOCAL_STORAGE_KEYS = {
   GAME_HISTORY: 'forasteros_gameHistory',
   CURRENT_GAME: 'forasteros_currentGame',
   TEAMS: 'forasteros_teams', // Added new key for teams
-  APP_THEME: 'app-theme', // For storing theme preference
 };
 
 export const INITIAL_GAME_SETTINGS: GameSettings = {

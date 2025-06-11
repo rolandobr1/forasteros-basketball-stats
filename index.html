@@ -22,25 +22,18 @@
         theme: {
           extend: {
             colors: {
-              // Default (Light Theme) colors
-              'brand-bg-light': '#f8f9fa',
-              'brand-surface-light': '#ffffff',
-              'brand-accent-light': '#e53e3e', // Lighter red for light mode accent
-              'brand-button-light': '#6c757d', 
-              'brand-button-hover-light': '#5a6268',
-              'brand-text-primary-light': '#212529',
-              'brand-text-secondary-light': '#6c757d',
-              'brand-border-light': '#dee2e6',
-
-              // Dark Theme colors (apply with dark: prefix)
-              'brand-dark': '#1a202c', 
-              'brand-surface': '#2d3748', 
-              'brand-accent': '#a50515', 
-              'brand-button': '#6B7280', 
-              'brand-button-hover': '#4B5563', 
-              'brand-text-primary': '#e2e8f0', 
-              'brand-text-secondary': '#a0aec0',
-              'brand-border': '#4a5568',
+              // These colors are primarily for the dark theme or can be shared.
+              // Light theme will use default Tailwind palette (e.g., gray-100 for bg, gray-800 for text)
+              // and dark: prefix for these brand colors.
+              'brand-dark': '#1a202c',        // For dark theme gradient
+              'brand-surface': '#2d3748',     // dark:bg-brand-surface
+              'brand-accent': '#a50515',      // Accent color (can be used in both themes or overridden)
+              'brand-accent-hover': '#c1121f',// e.g., dark:hover:bg-brand-accent-hover
+              'brand-button': '#6B7280',      // e.g., dark:bg-brand-button
+              'brand-button-hover': '#4B5563',// e.g., dark:hover:bg-brand-button-hover
+              'brand-text-primary': '#e2e8f0',// e.g., dark:text-brand-text-primary
+              'brand-text-secondary': '#a0aec0',// e.g., dark:text-brand-text-secondary
+              'brand-border': '#4a5568',      // e.g., dark:border-brand-border
             }
           }
         }
@@ -60,7 +53,7 @@
 </script>
 <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-brand-bg-light dark:bg-brand-dark">
+  <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script> 
   <script type="module" src="/index.tsx"></script>

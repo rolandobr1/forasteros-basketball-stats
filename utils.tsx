@@ -1,25 +1,20 @@
 
 import React from 'react';
-import { PiBasketball, PiSignOutBold, PiQuestion, PiSunDimBold, PiMoonStarsBold } from 'react-icons/pi'; // Import the new icon
-import { FaRegTrashAlt, FaExchangeAlt } from 'react-icons/fa'; // Import FaRegTrashAlt and FaExchangeAlt
-import { GiBasketballBasket } from 'react-icons/gi'; // Added for LiveGameIcon
-import { IoStatsChart } from "react-icons/io5"; // Added for StatsChartIcon
-import { GoStarFill } from "react-icons/go"; // Added for GoStarFillIcon
-import { VscDebugRestart } from "react-icons/vsc"; // Added for RestartIcon
-import { Game, GamePhase, GameSettings, TeamGameInfo } from './types'; // Added Game, GamePhase, GameSettings for gameLogic
+import { PiBasketball, PiSignOutBold, PiQuestion, PiSun, PiMoon } from 'react-icons/pi'; // Import Sun and Moon icons
+import { FaRegTrashAlt, FaExchangeAlt } from 'react-icons/fa';
+import { GiBasketballBasket } from 'react-icons/gi';
+import { IoStatsChart } from "react-icons/io5";
+import { GoStarFill } from "react-icons/go";
+import { VscDebugRestart } from "react-icons/vsc";
+import { Game, GamePhase, GameSettings, TeamGameInfo } from './types';
 
 // Formats time in seconds to MM:SS
 export const formatTime = (totalSeconds: number): string => {
-  // Floor the total seconds to display whole seconds, typical for countdowns
   const flooredTotalSeconds = Math.floor(totalSeconds);
-
-  // Calculate total minutes, allowing them to exceed 59 if totalSeconds is >= 3600
   const totalMinutes = Math.floor(flooredTotalSeconds / 60);
   const seconds = flooredTotalSeconds % 60;
-
   const formattedMinutes = String(totalMinutes).padStart(2, '0');
   const formattedSeconds = String(seconds).padStart(2, '0');
-
   return `${formattedMinutes}:${formattedSeconds}`;
 };
 
@@ -44,11 +39,9 @@ export const advanceGameTime = (currentGame: Game, elapsedSeconds: number): Game
     homeTeam,
     awayTeam,
     startTime,
-  } = { ...currentGame }; // Work with a copy
+  } = { ...currentGame };
 
   if (!isPhaseWithActiveTimer(gamePhase) || !currentGame.timerIsRunning) {
-    // If timer isn't supposed to be running for this phase or explicitly paused,
-    // return current state but ensure lastTickTimestamp might be updated by caller.
     return currentGame;
   }
 
@@ -62,7 +55,6 @@ export const advanceGameTime = (currentGame: Game, elapsedSeconds: number): Game
 
   while (currentTimeRemainingInPhase <= 0) {
     const timeOverShot = Math.abs(currentTimeRemainingInPhase);
-
     if (gamePhase === GamePhase.WARMUP) {
       gamePhase = GamePhase.IN_PROGRESS;
       currentQuarter = 1;
@@ -71,19 +63,19 @@ export const advanceGameTime = (currentGame: Game, elapsedSeconds: number): Game
       needsFoulReset = true;
       if (!startTime) startTime = new Date().toISOString();
     } else if (gamePhase === GamePhase.IN_PROGRESS) {
-      if (!isOvertime) { // Regulation period ended
+      if (!isOvertime) {
         if (currentQuarter < settings.quarters) {
           gamePhase = (currentQuarter === Math.floor(settings.quarters / 2)) ? GamePhase.HALFTIME : GamePhase.QUARTER_BREAK;
           const breakDur = settings.breakDuration || 60;
           currentTimeRemainingInPhase = (gamePhase === GamePhase.HALFTIME) ? breakDur * 2 : breakDur;
-          currentQuarter++; // Advance to prepare for the quarter *after* this break
+          currentQuarter++;
           needsFoulReset = true;
-        } else { // End of Q4 (or last regulation quarter)
+        } else {
           gamePhase = GamePhase.OVERTIME_BREAK; 
           currentTimeRemainingInPhase = settings.breakDuration || 60;
           needsFoulReset = true; 
         }
-      } else { // Overtime period ended
+      } else {
         gamePhase = GamePhase.OVERTIME_BREAK;
         currentTimeRemainingInPhase = settings.breakDuration || 60;
         currentQuarter++; 
@@ -312,9 +304,9 @@ export const CircleIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 );
 
 export const SunIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <PiSunDimBold {...props} />
+  <PiSun {...props} />
 );
 
 export const MoonIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <PiMoonStarsBold {...props} />
+  <PiMoon {...props} />
 );

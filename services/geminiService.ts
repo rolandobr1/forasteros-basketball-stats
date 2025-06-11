@@ -1,5 +1,4 @@
 
-
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 
 // Ensure API_KEY is accessed from environment variables

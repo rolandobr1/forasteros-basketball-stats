@@ -7,9 +7,9 @@ import GameSetupPage from './pages/GameSetupPage';
 import GamePage from './pages/GamePage';
 import HistoryPage from './pages/HistoryPage';
 import RosterManagementPage from './pages/RosterManagementPage';
-import HelpPage from './pages/HelpPage'; 
+import HelpPage from './pages/HelpPage';
 import DropdownMenu from './components/DropdownMenu';
-import GoBackButton from './components/GoBackButton'; 
+import GoBackButton from './components/GoBackButton';
 import { Player, Game, GamePhase, Team } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { LOCAL_STORAGE_KEYS } from './constants';
@@ -20,12 +20,12 @@ import {
   UsersIcon,
   ClockIcon,
   SignOutIcon,
-  QuestionIcon, 
-  LiveGameIcon, 
-  SunIcon, // Import SunIcon
-  MoonIcon, // Import MoonIcon
-  advanceGameTime, 
-  formatTime, 
+  QuestionIcon,
+  LiveGameIcon,
+  advanceGameTime,
+  formatTime,
+  SunIcon, 
+  MoonIcon, 
 } from './utils';
 
 const ScrollToTop = () => {
@@ -59,10 +59,8 @@ const EnsureInitialRoute: React.FC = () => {
   return null;
 };
 
-type Theme = 'light' | 'dark';
-
 interface AppLayoutProps {
-  menuItems: { path?: string; label: string; icon: React.ReactNode; action?: () => void, isThemeToggle?: boolean }[]; // Allow action for theme toggle
+  menuItems: { path: string; label: string; icon: React.ReactNode; action?: () => void; }[];
   playersRoster: Player[];
   addPlayerToRoster: (player: Omit<Player, 'id' | 'position'> & { position?: string }) => void;
   addPlayersBatchToRoster: (playersData: Array<Omit<Player, 'id' | 'position'> & { position?: string }>) => void;
@@ -79,11 +77,10 @@ interface AppLayoutProps {
   saveCompletedGame: (game: Game) => void;
   gameHistory: Game[];
   deleteGameFromHistory: (gameId: string) => void;
-  deleteMultipleGamesFromHistory: (gameIds: string[]) => void;
-  currentTheme: Theme; // Add currentTheme
+  currentTheme: 'light' | 'dark'; 
 }
 
-const AppLayout: React.FC<AppLayoutProps> = ({
+const AppLayout: React.FC<AppLayoutProps> = React.memo(({
   menuItems,
   playersRoster,
   addPlayerToRoster,
@@ -101,8 +98,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   saveCompletedGame,
   gameHistory,
   deleteGameFromHistory,
-  deleteMultipleGamesFromHistory,
-  currentTheme, // Destructure currentTheme
+  // currentTheme // Not directly used in AppLayout rendering, theme is applied to <html>
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -111,7 +107,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
 
   const showTopButtons = location.pathname !== '/';
   const showBackButton = showTopButtons && location.pathname !== '/home';
-  const showHomeButton = showBackButton; 
+  const showHomeButton = showBackButton;
   
   const showGameInProgressButton = 
     showTopButtons && 
@@ -119,7 +115,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
     currentGame.gamePhase !== GamePhase.FINISHED && 
     location.pathname !== '/game';
 
-  const shouldDisplayLiveTime = (game: Game | null): boolean => {
+  const shouldDisplayLiveTime = useCallback((game: Game | null): boolean => {
     if (!game) return false;
     return [
       GamePhase.IN_PROGRESS,
@@ -129,7 +125,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({
       GamePhase.OVERTIME_BREAK,
       GamePhase.TIMEOUT,
     ].includes(game.gamePhase);
-  };
+  }, []);
+
+  const handleNavigateHome = useCallback(() => navigate('/home'), [navigate]);
+  const handleNavigateGame = useCallback(() => navigate('/game'), [navigate]);
+  const handleToggleMenu = useCallback(() => setIsMenuOpen(prev => !prev), []);
+  const handleCloseMenu = useCallback(() => setIsMenuOpen(false), []);
 
   return (
     <>
@@ -138,8 +139,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({
           {showBackButton && <GoBackButton />}
           {showHomeButton && (
              <button
-              onClick={() => navigate('/home')}
-              className="flex items-center text-brand-text-primary-light dark:text-brand-text-primary p-2 rounded-full bg-brand-surface-light dark:bg-brand-surface hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-accent-light dark:focus:ring-brand-accent shadow-md"
+              onClick={handleNavigateHome}
+              className="flex items-center text-gray-700 dark:text-white p-2 rounded-full bg-white dark:bg-brand-surface shadow-md hover:bg-gray-200 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-accent"
               aria-label="Ir a Inicio"
             >
               <StartIcon className="w-5 h-5" />
@@ -148,7 +149,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
           {showGameInProgressButton && currentGame && (
             <>
               <button
-                onClick={() => navigate('/game')}
+                onClick={handleNavigateGame}
                 className="flex items-center text-white p-2 rounded-md bg-green-600 hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-md text-sm"
                 aria-label="Ir al partido en curso"
               >
@@ -157,7 +158,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
               </button>
               {shouldDisplayLiveTime(currentGame) && (
                 <span 
-                  className="text-white text-sm font-mono bg-slate-700 px-2 py-1 rounded-md shadow-md"
+                  className="text-gray-700 dark:text-white text-sm font-mono bg-gray-200 dark:bg-slate-700 px-2 py-1 rounded-md shadow-md"
                   aria-label="Tiempo de juego actual"
                 >
                   {formatTime(Math.max(0, currentGame.currentTimeRemainingInPhase))}
@@ -172,8 +173,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({
           <div className="relative">
             <button
               ref={menuButtonRef}
-              onClick={() => setIsMenuOpen(prev => !prev)}
-              className="text-brand-text-primary-light dark:text-brand-text-primary p-2 rounded-full bg-brand-surface-light dark:bg-brand-surface hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-accent-light dark:focus:ring-brand-accent"
+              onClick={handleToggleMenu}
+              className="text-gray-700 dark:text-white p-2 rounded-full bg-white dark:bg-brand-surface shadow-md hover:bg-gray-200 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-accent"
               aria-label="Abrir menú de navegación"
               aria-haspopup="true"
               aria-expanded={isMenuOpen}
@@ -183,10 +184,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({
             </button>
             <DropdownMenu
               isOpen={isMenuOpen}
-              onClose={() => setIsMenuOpen(false)}
+              onClose={handleCloseMenu}
               menuItems={menuItems}
               triggerRef={menuButtonRef}
-              currentTheme={currentTheme} // Pass currentTheme
             />
           </div>
         </div>
@@ -223,7 +223,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({
               <HistoryPage
                 gameHistory={gameHistory}
                 onDeleteGame={deleteGameFromHistory}
-                onDeleteMultipleGames={deleteMultipleGamesFromHistory}
               />
             }
           />
@@ -250,31 +249,30 @@ const AppLayout: React.FC<AppLayoutProps> = ({
       </main>
     </>
   );
-};
+});
 
 const App: React.FC = () => {
   const [playersRoster, setPlayersRoster] = useLocalStorage<Player[]>(LOCAL_STORAGE_KEYS.PLAYERS_ROSTER, []);
   const [gameHistory, setGameHistory] = useLocalStorage<Game[]>(LOCAL_STORAGE_KEYS.GAME_HISTORY, []);
   const [currentGame, setCurrentGame] = useLocalStorage<Game | null>(LOCAL_STORAGE_KEYS.CURRENT_GAME, null);
   const [teams, setTeams] = useLocalStorage<Team[]>(LOCAL_STORAGE_KEYS.TEAMS, []);
-  const [theme, setTheme] = useLocalStorage<Theme>('app-theme', 'dark'); // Theme state
+  const [theme, setTheme] = useLocalStorage<'light' | 'dark'>('app-theme', 'light');
 
   const intervalRef = useRef<number | null>(null);
 
-  // Apply theme class to HTML element
   useEffect(() => {
     const root = window.document.documentElement;
-    if (theme === 'light') {
-      root.classList.remove('dark');
-    } else {
+    if (theme === 'dark') {
       root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
     }
   }, [theme]);
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
-  };
-
+  }, [setTheme]);
+  
   const isPhaseWithRunningTimer = useCallback((phase: GamePhase | undefined): boolean => {
     if (!phase) return false;
     return [
@@ -294,8 +292,7 @@ const App: React.FC = () => {
       if (gameToProcess.lastTickTimestamp) {
         elapsedSeconds = (now - gameToProcess.lastTickTimestamp) / 1000;
       }
-      
-      if (elapsedSeconds <= 0) elapsedSeconds = 0.01; 
+      if (elapsedSeconds <= 0) elapsedSeconds = 0.01; // Ensure a minimal positive elapsed time
   
       const updatedGame = advanceGameTime(gameToProcess, elapsedSeconds);
       return { ...updatedGame, lastTickTimestamp: now };
@@ -306,36 +303,43 @@ const App: React.FC = () => {
         clearInterval(intervalRef.current);
       }
 
+      // Catch-up logic if browser tab was inactive
       if (currentGame.lastTickTimestamp) {
           const timeSinceLastTick = Date.now() - currentGame.lastTickTimestamp;
-          if (timeSinceLastTick > 2000) { 
+          if (timeSinceLastTick > 2000) { // More than 2 seconds since last tick, likely tab was inactive
+              // console.log(`Catching up game time. ${timeSinceLastTick / 1000}s missed.`);
               const caughtUpGame = processGameTick(currentGame);
-              setCurrentGame(caughtUpGame); 
+              setCurrentGame(caughtUpGame); // Process once to catch up
           }
       } else {
+         // First time timer is starting for this game, set initial timestamp
          setCurrentGame(prev => prev ? {...prev, lastTickTimestamp: Date.now()} : null);
       }
 
+      // Regular interval
       intervalRef.current = window.setInterval(() => {
         setCurrentGame(prevGame => {
           if (prevGame && prevGame.timerIsRunning && isPhaseWithRunningTimer(prevGame.gamePhase)) {
             return processGameTick(prevGame);
           } else {
+            // Timer should stop
             if (intervalRef.current) clearInterval(intervalRef.current);
             intervalRef.current = null;
-            return prevGame; 
+            return prevGame; // Return previous state if no update needed or timer stopped
           }
         });
-      }, 1000);
+      }, 1000); // Run every second
 
     } else {
+      // Timer should not be running
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
     }
 
-    return () => { 
+    // Cleanup interval on component unmount or when dependencies change
+    return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -344,110 +348,110 @@ const App: React.FC = () => {
   }, [currentGame, setCurrentGame, isPhaseWithRunningTimer]);
 
 
-  const menuItems = [
+  const menuItems = React.useMemo(() => [
     { path: "/home", label: "Inicio", icon: <StartIcon /> },
     { path: "/game", label: "Partido", icon: <BasketballIcon /> },
     { path: "/roster", label: "Jugadores", icon: <UsersIcon /> },
     { path: "/history", label: "Historial", icon: <ClockIcon /> },
-    { path: "/help", label: "Ayuda", icon: <QuestionIcon /> }, 
+    { path: "/help", label: "Ayuda", icon: <QuestionIcon /> },
     { 
-      label: theme === 'light' ? "Modo Oscuro" : "Modo Claro", 
-      icon: theme === 'light' ? <MoonIcon /> : <SunIcon />, 
-      action: toggleTheme,
-      isThemeToggle: true 
+      path: "#theme-toggle", 
+      label: theme === 'light' ? "Cambiar a Tema Oscuro" : "Cambiar a Tema Claro", 
+      icon: theme === 'light' 
+        ? <MoonIcon className="text-gray-700 dark:text-brand-text-secondary" /> 
+        : <SunIcon className="text-gray-700 dark:text-brand-text-secondary" />,
+      action: toggleTheme 
     },
     { path: "/", label: "Cerrar Sesión", icon: <SignOutIcon /> },
-  ];
+  ], [theme, toggleTheme]);
 
-  const addPlayerToRoster = (player: Omit<Player, 'id' | 'position'> & { position?: string }) => {
+  const addPlayerToRoster = useCallback((player: Omit<Player, 'id' | 'position'> & { position?: string }) => {
     const newPlayer = { ...player, id: crypto.randomUUID(), position: player.position || "" };
     setPlayersRoster(prev => [...prev, newPlayer]);
-  };
+  }, [setPlayersRoster]);
 
-  const addPlayersBatchToRoster = (playersData: Array<Omit<Player, 'id' | 'position'> & { position?: string }>) => {
+  const addPlayersBatchToRoster = useCallback((playersData: Array<Omit<Player, 'id' | 'position'> & { position?: string }>) => {
     const newPlayers = playersData.map(playerData => ({
       ...playerData,
       id: crypto.randomUUID(),
       position: playerData.position || ""
     }));
     setPlayersRoster(prevRoster => [...prevRoster, ...newPlayers]);
-  };
+  }, [setPlayersRoster]);
 
-  const updatePlayerInRoster = (updatedPlayer: Player) => {
+  const updatePlayerInRoster = useCallback((updatedPlayer: Player) => {
     setPlayersRoster(prev => prev.map(p => p.id === updatedPlayer.id ? { ...p, ...updatedPlayer, position: updatedPlayer.position || "" } : p));
-  };
+  }, [setPlayersRoster]);
 
-  const deletePlayerFromRoster = (playerId: string) => {
+  const deletePlayerFromRoster = useCallback((playerId: string) => {
     setPlayersRoster(prev => prev.filter(p => p.id !== playerId));
+    // Also remove player from any teams they were part of
     setTeams(prevTeams =>
       prevTeams.map(team => ({
         ...team,
         playerIds: team.playerIds.filter(id => id !== playerId)
       }))
     );
-  };
+  }, [setPlayersRoster, setTeams]);
 
-  const reorderPlayersInRoster = (newRoster: Player[]) => {
+  const reorderPlayersInRoster = useCallback((newRoster: Player[]) => {
     setPlayersRoster(newRoster);
-  };
+  }, [setPlayersRoster]);
 
-  const addTeam = (name: string, playerIds: string[] = []) => {
+  const addTeam = useCallback((name: string, playerIds: string[] = []) => {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      console.error("Team name cannot be empty."); 
+      console.error("Team name cannot be empty."); // Consider using alert or other UI feedback
       return;
     }
     if (teams.some(team => team.name.toLowerCase() === trimmedName.toLowerCase())) {
-      console.error("Team name already exists."); 
+      console.error("Team name already exists."); // Consider UI feedback
       return;
     }
     const newTeam: Team = { id: crypto.randomUUID(), name: trimmedName, playerIds };
     setTeams(prev => [...prev, newTeam]);
-  };
+  }, [teams, setTeams]);
 
-  const updateTeamName = (teamId: string, newName: string) => {
-    if (!newName.trim()) {
+  const updateTeamName = useCallback((teamId: string, newName: string) => {
+    const trimmedNewName = newName.trim();
+    if (!trimmedNewName) {
       alert("El nombre del equipo no puede estar vacío."); return;
     }
-    if (teams.some(team => team.id !== teamId && team.name.toLowerCase() === newName.trim().toLowerCase())) {
+    if (teams.some(team => team.id !== teamId && team.name.toLowerCase() === trimmedNewName.toLowerCase())) {
       alert("Ya existe otro equipo con este nombre."); return;
     }
-    setTeams(prev => prev.map(team => team.id === teamId ? { ...team, name: newName.trim() } : team));
-  };
+    setTeams(prev => prev.map(team => team.id === teamId ? { ...team, name: trimmedNewName } : team));
+  }, [teams, setTeams]);
 
-  const deleteTeam = (teamId: string) => {
+  const deleteTeam = useCallback((teamId: string) => {
     setTeams(prev => prev.filter(team => team.id !== teamId));
-  };
+  }, [setTeams]);
 
-  const assignPlayersToTeam = (teamId: string, newPlayerIds: string[]) => {
+  const assignPlayersToTeam = useCallback((teamId: string, newPlayerIds: string[]) => {
     setTeams(prev => prev.map(team => team.id === teamId ? { ...team, playerIds: newPlayerIds } : team));
-  };
+  }, [setTeams]);
 
-  const saveCompletedGame = (game: Game) => {
+  const saveCompletedGame = useCallback((game: Game) => {
     const finalGame = { 
         ...game, 
         gamePhase: GamePhase.FINISHED, 
         endTime: new Date().toISOString(),
-        timerIsRunning: false, 
-        lastTickTimestamp: null 
+        timerIsRunning: false, // Ensure timer is stopped
+        lastTickTimestamp: null // Clear last tick
     };
     setGameHistory(prev => [finalGame, ...prev]);
-    setCurrentGame(null);
-  };
+    setCurrentGame(null); // Clear current game
+  }, [setGameHistory, setCurrentGame]);
 
-  const deleteGameFromHistory = (gameId: string) => {
+  const deleteGameFromHistory = useCallback((gameId: string) => {
     setGameHistory(prev => prev.filter(game => game.id !== gameId));
-  };
-
-  const deleteMultipleGamesFromHistory = (gameIds: string[]) => {
-    setGameHistory(prev => prev.filter(game => !gameIds.includes(game.id)));
-  };
+  }, [setGameHistory]);
 
   return (
     <HashRouter>
       <ScrollToTop />
       <EnsureInitialRoute />
-      <div className="bg-brand-bg-light dark:bg-gradient-to-br dark:from-gray-900 dark:via-black dark:to-red-900 min-h-screen flex flex-col overflow-x-hidden select-none">
+      <div className="bg-gray-100 dark:bg-gradient-to-br dark:from-brand-dark dark:via-black dark:to-red-900 min-h-screen flex flex-col overflow-x-hidden select-none">
         <AppLayout
           menuItems={menuItems}
           playersRoster={playersRoster}
@@ -466,8 +470,7 @@ const App: React.FC = () => {
           saveCompletedGame={saveCompletedGame}
           gameHistory={gameHistory}
           deleteGameFromHistory={deleteGameFromHistory}
-          deleteMultipleGamesFromHistory={deleteMultipleGamesFromHistory}
-          currentTheme={theme} // Pass theme to AppLayout
+          currentTheme={theme}
         />
       </div>
     </HashRouter>

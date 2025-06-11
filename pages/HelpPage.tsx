@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { QuestionIcon, XMarkIcon } from '../utils'; // Assuming QuestionIcon will be added to utils
+import React, { useState, useCallback } from 'react';
+import { QuestionIcon, XMarkIcon } from '../utils';
 import AlertDialog from '../components/AlertDialog';
 
 interface FAQItem {
@@ -51,53 +51,57 @@ const faqData: FAQItem[] = [
   },
 ];
 
-const HelpPage: React.FC = () => {
+const HelpPage: React.FC = React.memo(() => {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [formState, setFormState] = useState({ name: '', email: '', subject: '', message: '' });
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  const toggleFAQ = (index: number) => {
-    setOpenFAQ(openFAQ === index ? null : index);
-  };
+  const toggleFAQ = useCallback((index: number) => {
+    setOpenFAQ(prevOpenFAQ => (prevOpenFAQ === index ? null : index));
+  }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormState(prev => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate form submission
-    console.log("Form submitted:", formState);
+    // In a real app, you'd send this data to a server
+    console.log("Form submitted (simulated):", formState);
     setShowConfirmation(true);
     setFormState({ name: '', email: '', subject: '', message: '' }); // Reset form
-  };
+  }, [formState]);
+
+  const closeConfirmation = useCallback(() => {
+    setShowConfirmation(false);
+  }, []);
 
   return (
     <div className="space-y-8 py-6">
-      <h1 className="text-4xl font-bold text-center text-white mb-10">Página de Ayuda</h1>
+      <h1 className="text-4xl font-bold text-center text-gray-800 dark:text-white mb-10">Página de Ayuda</h1>
 
-      <section className="bg-brand-surface p-6 rounded-lg shadow-xl">
-        <h2 className="text-2xl font-semibold text-white mb-6 flex items-center">
-          <QuestionIcon className="w-7 h-7 mr-3" />
+      <section className="bg-white dark:bg-brand-surface p-6 rounded-lg shadow-xl">
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6 flex items-center">
+          <QuestionIcon className="w-7 h-7 mr-3 text-brand-accent" />
           Preguntas Frecuentes (FAQ)
         </h2>
         <div className="space-y-3">
           {faqData.map((item, index) => (
-            <div key={index} className="border border-slate-700 rounded-md overflow-hidden">
+            <div key={index} className="border border-gray-200 dark:border-slate-700 rounded-md overflow-hidden">
               <button
                 onClick={() => toggleFAQ(index)}
-                className="w-full flex justify-between items-center p-4 bg-slate-700 hover:bg-slate-600 focus:outline-none"
+                className="w-full flex justify-between items-center p-4 bg-gray-50 dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 focus:outline-none"
                 aria-expanded={openFAQ === index}
                 aria-controls={`faq-content-${index}`}
               >
-                <span className="text-md font-medium text-white text-left">{item.question}</span>
+                <span className="text-md font-medium text-gray-700 dark:text-white text-left">{item.question}</span>
                 <span className={`transform transition-transform duration-200 ${openFAQ === index ? 'rotate-180' : 'rotate-0'}`}>
-                  <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  <svg className="w-5 h-5 text-gray-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                 </span>
               </button>
               {openFAQ === index && (
-                <div id={`faq-content-${index}`} className="p-4 bg-slate-800 text-slate-300 text-sm">
+                <div id={`faq-content-${index}`} className="p-4 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-sm">
                   <p>{item.answer}</p>
                 </div>
               )}
@@ -106,11 +110,11 @@ const HelpPage: React.FC = () => {
         </div>
       </section>
 
-      <section className="bg-brand-surface p-6 rounded-lg shadow-xl">
-        <h2 className="text-2xl font-semibold text-white mb-6">Contactar Soporte</h2>
+      <section className="bg-white dark:bg-brand-surface p-6 rounded-lg shadow-xl">
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">Contactar Soporte (Simulación)</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-1">Nombre</label>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nombre</label>
             <input
               type="text"
               name="name"
@@ -118,11 +122,11 @@ const HelpPage: React.FC = () => {
               value={formState.name}
               onChange={handleInputChange}
               required
-              className="w-full p-2.5 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent select-auto"
+              className="w-full p-2.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-white border border-gray-300 dark:border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent select-auto"
             />
           </div>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1">Correo Electrónico</label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Correo Electrónico</label>
             <input
               type="email"
               name="email"
@@ -130,11 +134,11 @@ const HelpPage: React.FC = () => {
               value={formState.email}
               onChange={handleInputChange}
               required
-              className="w-full p-2.5 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent select-auto"
+              className="w-full p-2.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-white border border-gray-300 dark:border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent select-auto"
             />
           </div>
           <div>
-            <label htmlFor="subject" className="block text-sm font-medium text-slate-300 mb-1">Asunto</label>
+            <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Asunto</label>
             <input
               type="text"
               name="subject"
@@ -142,11 +146,11 @@ const HelpPage: React.FC = () => {
               value={formState.subject}
               onChange={handleInputChange}
               required
-              className="w-full p-2.5 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent select-auto"
+              className="w-full p-2.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-white border border-gray-300 dark:border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent select-auto"
             />
           </div>
           <div>
-            <label htmlFor="message" className="block text-sm font-medium text-slate-300 mb-1">Mensaje</label>
+            <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Mensaje</label>
             <textarea
               name="message"
               id="message"
@@ -154,7 +158,7 @@ const HelpPage: React.FC = () => {
               value={formState.message}
               onChange={handleInputChange}
               required
-              className="w-full p-2.5 rounded bg-slate-700 text-white border border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent select-auto"
+              className="w-full p-2.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-white border border-gray-300 dark:border-slate-600 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent select-auto"
             ></textarea>
           </div>
           <button
@@ -168,13 +172,13 @@ const HelpPage: React.FC = () => {
 
       <AlertDialog
         isOpen={showConfirmation}
-        onClose={() => setShowConfirmation(false)}
+        onClose={closeConfirmation}
         title="Mensaje Enviado (Simulación)"
       >
         <p>Tu mensaje ha sido enviado con éxito (simulación). Un miembro de nuestro equipo de soporte se pondrá en contacto contigo pronto.</p>
       </AlertDialog>
     </div>
   );
-};
+});
 
 export default HelpPage;
