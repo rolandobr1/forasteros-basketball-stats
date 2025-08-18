@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Favicon actualizado -->
+    <link rel="icon" type="image/png" href="https://i.imgur.com/Wn0F6h5.png" /> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Título de la aplicación actualizado -->
+    <title>Forasteros Stats Tracker</title>
+
+    <!-- Metaetiquetas para iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Forasteros Stats">
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class', // Enable class-based dark mode
+        theme: {
+          extend: {
+            colors: {
+              // These colors are primarily for the dark theme or can be shared.
+              // Light theme will use default Tailwind palette (e.g., gray-100 for bg, gray-800 for text)
+              // and dark: prefix for these brand colors.
+              'brand-dark': '#1a202c',        // For dark theme gradient
+              'brand-surface': '#2d3748',     // dark:bg-brand-surface
+              'brand-accent': '#a50515',      // Accent color (can be used in both themes or overridden)
+              'brand-accent-hover': '#c1121f',// e.g., dark:hover:bg-brand-accent-hover
+              'brand-button': '#6B7280',      // e.g., dark:bg-brand-button
+              'brand-button-hover': '#4B5563',// e.g., dark:hover:bg-brand-button-hover
+              'brand-text-primary': '#e2e8f0',// e.g., dark:text-brand-text-primary
+              'brand-text-secondary': '#a0aec0',// e.g., dark:text-brand-text-secondary
+              'brand-border': '#4a5568',      // e.g., dark:border-brand-border
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react-icons/": "https://esm.sh/react-icons@^5.5.0/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.4.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.6.2"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script> 
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
